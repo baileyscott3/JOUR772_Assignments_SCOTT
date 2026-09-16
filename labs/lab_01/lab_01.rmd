@@ -88,7 +88,7 @@ umd_courses |>
 
 **Q5** Take one of the questions you listed in the final question of the pre_lab and try to answer it here in code. If you don't know how to fully answer it, write what code you can and describe in words what else you would need to do. If you got an answer, is it interesting?
 
-**A5**
+**A5** I asked the question, "Who are the professors with the highest number of syllabuses uploaded?" The answer was George Syrmos, with 473 total syllabuses uploaded across 22 classes. This is very interesting, because it seems like way too many for one person.
 
 ```{r}
 umd_courses |> 
@@ -100,4 +100,15 @@ umd_courses |>
   arrange(desc(total_syllabus))
 
 
+```
+
+```{r}
+
+# which teacher has taught the highest number of classes, for fun :)
+umd_courses |> 
+  group_by(instructors) |> 
+  summarise(
+    count_classes = n()
+  ) |> 
+  arrange(desc(count_classes))
 ```
