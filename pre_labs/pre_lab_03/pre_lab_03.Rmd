@@ -129,10 +129,10 @@ library(janitor)
 
 Let's continue with our Maryland grants and loans data that we worked with in the previous chapter. There are a number of issues with this data set that might get in the way of asking questions and receiving accurate answers. They are:
 
--   The column names have spaces in them. This isn't a deal-breaker, as we used this dataframe previously. But it does require that you do some things differently when writing code, and ideally you don't want spaces in your column names.
--   Inconsistent capitalization across multiple columns. Sometimes the grantee is capitalized, and other times not. Portions of the grantor name are sometimes capitalized. This issue will ruin your ability to count and add things using those columns.
--   The zip field mixes five digit ZIP codes and nine digit ZIP codes, and some of the records include spaces. If we wanted to group and count the number of loans in a given ZIP code, this inconsistency would not let us do that correctly.
--   The category column is inconsistent and has some missing values.
+- The column names have spaces in them. This isn't a deal-breaker, as we used this dataframe previously. But it does require that you do some things differently when writing code, and ideally you don't want spaces in your column names.
+- Inconsistent capitalization across multiple columns. Sometimes the grantee is capitalized, and other times not. Portions of the grantor name are sometimes capitalized. This issue will ruin your ability to count and add things using those columns.
+- The zip field mixes five digit ZIP codes and nine digit ZIP codes, and some of the records include spaces. If we wanted to group and count the number of loans in a given ZIP code, this inconsistency would not let us do that correctly.
+- The category column is inconsistent and has some missing values.
 
 Let's get cleaning. Our goal will be to build up one block of code that does all the necessary cleaning in order to answer this question: which zip code has gotten the most amount of money from the Maryland Tourism Board?
 
@@ -245,6 +245,8 @@ cleaned_md_grants_loans <- md_grants_loans |>
     zip5 == "Vario" ~ NA,
     zip5 == "UB7 O" ~ NA,
     zip5 == "UB7 " ~ NA,
+    zip5 == "0" ~ NA,
+    zip5 == "O8108" ~ "08108",
     .default = zip5
   ))
 
@@ -257,5 +259,7 @@ cleaned_md_grants_loans
 **Task** Write and run code to answer our original question: which zip code has gotten the most amount of money from the Maryland Tourism Board? Where is that zip code, and does that zip code make sense to you as the top recipient? Write a sentence describing the top result. **Answer**
 
 ```{r}
+
+
 
 ```
