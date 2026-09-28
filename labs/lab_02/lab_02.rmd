@@ -46,6 +46,11 @@ climate_classes |>
   ) |> 
   arrange(desc(count_classes))
 
+
+weird_climate_courses <- umd_courses |> filter (str_detect(title, "Climate") & seats > 0 & (department == "Anthropology" | department == "Finance" | department == "Art History & Archaeology"))
+
+
+
 ```
 
 **Q2.** Of the departments listed in A1, which one is the most interesting to you, and why? **A2.** Anthropology is not a department that I would've expected would offer the second most climate-related classes
@@ -63,9 +68,10 @@ The difference between the two is the number of STEM classes, which I think are 
 ```{r}
 
 #looking at departments in fall 2024
-fall_2024_courses <- umd_courses |> filter (term == 202408)
+#fall_2024_courses <- umd_courses |> filter (term == 202408)
 
-fall_2024_courses |> 
+umd_courses |> 
+  filter (term == 202408) |> 
   group_by(department) |> 
   summarize(
     count_classes = n()
@@ -76,9 +82,10 @@ fall_2024_courses |>
 ```{r}
 
 #same but with syllabus
-syllabus_fall_2024_courses <- umd_courses |> filter (term == 202408 & syllabus_count >= 1)
+#syllabus_fall_2024_courses <- umd_courses |> filter (term == 202408 & syllabus_count >= 1)
 
-syllabus_fall_2024_courses |> 
+umd_courses |> 
+  filter (term == 202408 & syllabus_count >= 1) |> 
   group_by(department) |> 
   summarize(
     count_classes = n()
@@ -119,7 +126,7 @@ wes_moore |>
 
 **Q5.** Using case_when(), create a column in the Maryland expenses data called `spending_location` indicating whether each record spent money in Maryland or outside Maryland. For records that are in Maryland, make the new column's value "In-state" and for all others, make it "Out of state". Then write code that shows the total amount of money spent in each category and describe the results. You can do this in one statement or break it up into two statements (saving the new column to your dataframe).
 
-**A5.** \$77723146 was spent in Maryland, and \$33164994 was spent in other states
+**A5.** \$77723146 was spent in Maryland, and \$51565601 was spent in other states
 
 ```{r}
 
@@ -127,20 +134,12 @@ maryland_expenses |>
   mutate(
     spending_location = case_when(
       str_detect(address, " Maryland ") ~ "In-state",
-      str_detect(address, " California ") ~ "Out of state",
-      str_detect(address, " Washington ") ~ "Out of state",
-      str_detect(address, " Louisiana ") ~ "Out of state",
-      str_detect(address, " Florida ") ~ "Out of state",
-      str_detect(address, " North Carolina ") ~ "Out of state",
-      str_detect(address, " Massachusetts ") ~ "Out of state",
-      str_detect(address, " West Virginia ") ~ "Out of state",
-      str_detect(address, " Virginia ") ~ "Out of state",
-      .default = NA
+      .default = "Out of state"
     )
   ) |> 
   group_by(spending_location) |> 
   summarise(
-    total_amount = sum(amount)
+    total_amount = sum(amount, na.rm = T)
   ) |> 
   arrange(desc(total_amount))
 
