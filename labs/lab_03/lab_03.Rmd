@@ -131,9 +131,39 @@ stem_cell_grants |>
   arrange(fiscal_year)
 ```
 
-Q5: Using the Maryland grants and loan data, find records where the zip code is the one where the University of Maryland-College Park is located in and produce a list of grantees from that zip code, along with the total amount they received. Write a paragraph explaining how many grantees are there, what you would need to do to clean the results so that you had one record per grantee and which grantees are most interesting to you?
+Q5: Using the Maryland grants and loan data,
 
-A5:
+find records where the zip code is the one where the University of Maryland-College Park is located in
+
+and produce a list of grantees from that zip code, along with the total amount they received.
+
+Write a paragraph explaining how many grantees are there, what you would need to do to clean the results so that you had one record per grantee and which grantees are most interesting to you?
+
+**A5:** I count 15 unique grantees. To clean the results so that there is only one record per grantee, I think you would have to use case_when again, going through each grantee and standardizing them one by one. It works in this case because there are so few records for this filter, but it would be a lot harder the more records there are.
+
+I think the UMD data center grantee is interesting to me, simply because data centers are really under fire right now.
 
 ```{r}
+
+md_grants_loans <- md_grants_loans |> 
+  mutate(zip5 = str_sub(zip_code, start=1L, end=5L)) |> 
+  mutate(zip5 = case_when(
+    zip5 == "Vario" ~ NA,
+    zip5 == "0" ~ NA,
+    zip5 == "O8108" ~ "08108",
+    str_detect(zip5, "UB7") ~ NA,
+    .default = zip5
+  ))
+
+
+
+md_grants_loans |> 
+  filter(str_detect(zip5, "20742")) |> 
+  group_by(grantee) |> 
+  summarise(
+    total_amount = sum(amount)
+  ) |> 
+  arrange(grantee)
+
+
 ```
