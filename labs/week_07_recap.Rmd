@@ -167,39 +167,72 @@ earthquakes |>
 ```{r}
 
 earthquakes <- earthquakes |> 
-  mutate()
+  mutate(hour = hour(time))
 
 
 
 ```
 
-**A10:**
+**A10:** Use mutate to create a new hour column and then use the hour function on the time column to pull the hour
 
 ------------------------------------------------------------------------
 
 #### **Q11** I want to make a note of all the records in this data set that I consider serious. For my purposes, I'm thinking that all tremors that have a magnitude that is larger than 3 are serious. How do I automatically create a new column making that distinction?
 
 ```{r}
+ earthquakes <- earthquakes |> 
+  mutate(severity = case_when(
+      mag > 3 ~ "serious",
+      .default = "not serious"
+    )
+  )
+  
+
 
 ```
 
-**A11:**
+**A11:** Use mutate and case_when to go through every row in mag and if the number is greater than 3, put serious in the new column, and if it's under 3, but not serious
 
 ------------------------------------------------------------------------
 
 #### **Q12** I have no idea how earthquakes work and I'm interested in seeing if there is a particular time of day in which serious earthquakes happen. How can I see that condensed in a table with all the hours in a day and all the serious earthquakes in each hour? What is the hour with fewer serious earthquakes and the one with the most serious earthquakes?
 
 ```{r}
+earthquakes |> 
+  filter(severity == "serious") |> 
+  group_by(hour) |> 
+  summarise(
+    count = n()
+  ) |> 
+  #arrange(desc(count)) #for most serious
+  arrange(count) #for least serious
+
 
 ```
 
-**A12**:
+**A12**: The hour with the most serious earthquakes is a tie between 10:00 and 20:00, while the hour with the least amount of serious earthquakes is 6:00
 
 ------------------------------------------------------------------------
 
 #### EXTRA Q What other questions are you interested in and how would you ask them in R?
 
+
+Which days have had the most serious earthquakes? September 12th
 ```{r}
+earthquakes <- earthquakes |> 
+  mutate (month_day = format(time,"%m-%d")) #found this online for creating a month + day column from ymd dates 
+
+
+earthquakes |> 
+  filter(severity == "serious") |> 
+  group_by(month_day) |> 
+  summarise(
+    count = n()
+  ) |> 
+  arrange(desc(count))
+  
+
+
 
 ```
 
