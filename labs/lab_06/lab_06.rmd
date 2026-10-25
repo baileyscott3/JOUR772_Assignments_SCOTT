@@ -152,9 +152,36 @@ baltimore_demographic |>
 
 Q4. Choose your own adventure: I want you to come up with a question you could ask of the Baltimore City data that combines both the calls and the demographic information. You must use both demographics and the overdose call data in your work.
 
-A4:
+A4: What are the top zipcodes with the most rent, and how does their number of 911 calls per capita compare to the highest zipcodes in the city?
+
+The zip_codes with the highest number of calls per capita were the same as the zip_codes with the highest pct_rent, with one notable exception: 21231, which has over 60% rent, but just 6.9 calls per capita. My leading theory for this is that the zipcode is majority white + asian, while all the rest of the top renting zipcodes are majority black.
 
 ```{r}
+top_rent <- baltimore_demographic |> 
+  filter(pct_rent > 60) |> 
+  arrange(desc(pct_rent))
+
+top_rent |> 
+  group_by(zip_code, population) |> 
+  summarise(
+    num_calls = n()
+  ) |> 
+  mutate(calls_per_capita = (num_calls/population)*1000) |> 
+  arrange(desc(calls_per_capita))
+
+baltimore_demographic |> 
+  group_by(zip_code, population) |> 
+  summarise(
+    total_calls = n()
+  ) |> 
+  mutate(calls_per_capita = (total_calls/population)*1000) |> 
+  arrange(desc(calls_per_capita)) 
+  
+
+baltimore_demographic |> 
+  filter (zip_code == "21231") |> 
+  distinct(neighborhood, .keep_all = TRUE)
+
 
 
 
