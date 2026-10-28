@@ -34,6 +34,9 @@ library(tidyverse)
 library(lubridate)
 library(refinr)
 library(janitor)
+library(stringr)
+library(readxl)
+library(dplyr)
 
 ```
 
@@ -44,17 +47,14 @@ In this section, describe the source of the data, write a basic data dictionary 
 ```{r}
 # Load required data
 
-nc_finance_jan_dec <- read_csv("data/transinq_results.csv") |> 
-  
-nc_finance_jan_dec <- nc_finance_jan_dec |>  
-  clean_names() |> 
-  mutate(across(c(candidate_referendum_name, declaration), as.character)) |> 
-  mutate(name = str_to_upper(name))
+nc_finance_data <- read_excel("data/donors0103-0701.xlsx")
 
 # Path to data should be loaded from folder "data" i.e. read_csv("data/name_of_data.csv")
 
 # Clean required data and prepare for analysis if needed. 
 
+nc_finance_data <- nc_finance_data |> 
+  rename(name_clean = "name-clean")
 
 ```
 
@@ -63,13 +63,22 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 ### Sentence 1
 
-* **Sentence text**: [Paste in sentence to engineer here]
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+* **Sentence text**: The co-chief executives at a Georgia firm that brokers tax credits put $41,000 into the campaign accounts of North Carolina General Assembly members during the last regular legislative session. 
+* **Analysis summary**: We filtered by names of the two CEOs, GEORGE LEWIS STROBEL II and ROBIN E DELMER for the dates of the short legislative session in 2018, which was from May 16 to June 29. We also filtered for donations made to candidates. We found that, combined, the two men had donated a combined $41,250, which matches the original finding exactly.
 
 ```{r}
 # Put code to reverse engineer sentence here
-nc_finance_jan_dec |> 
-  filter(str_detect(name, "STROBEL"))
+nc_finance_data_session <- nc_finance_data |> 
+  filter(between(date, as.Date("2018-05-16"), as.Date("2018-06-29")))
+
+nc_finance_data_session |> 
+  filter((name_clean == "GEORGE LEWIS STROBEL II" | name_clean == "ROBIN E DELMER") & source == "candidates") |> 
+  group_by(name_clean) |> 
+  summarise(
+    total = sum(amount)
+  )
+
+
 # Display results of code below this codeblock
 
 ```
