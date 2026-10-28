@@ -18,13 +18,22 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction 
 
-In this notebook, we are reverse engineering the story, [STORY NAME](STORY URL)
+In this notebook, we are reverse engineering the story, [CEOs gave heavily during legislative session, exposing loophole in NC's fundraising ban](https://www.wral.com/archive/17716104/)
 
 ## Load libraries
 
 Loading required libraries for this analysis.
 
 ```{r echo=FALSE, message=FALSE}
+# Turn off scientific notation
+options(scipen=999)
+
+# load your libraries
+
+library(tidyverse)
+library(lubridate)
+library(refinr)
+library(janitor)
 
 ```
 
@@ -34,6 +43,13 @@ In this section, describe the source of the data, write a basic data dictionary 
 
 ```{r}
 # Load required data
+
+nc_finance_jan_dec <- read_csv("data/transinq_results.csv") |> 
+  
+nc_finance_jan_dec <- nc_finance_jan_dec |>  
+  clean_names() |> 
+  mutate(across(c(candidate_referendum_name, declaration), as.character)) |> 
+  mutate(name = str_to_upper(name))
 
 # Path to data should be loaded from folder "data" i.e. read_csv("data/name_of_data.csv")
 
@@ -52,7 +68,8 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 ```{r}
 # Put code to reverse engineer sentence here
-
+nc_finance_jan_dec |> 
+  filter(str_detect(name, "STROBEL"))
 # Display results of code below this codeblock
 
 ```
