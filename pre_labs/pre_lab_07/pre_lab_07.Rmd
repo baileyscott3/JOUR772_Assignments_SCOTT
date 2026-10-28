@@ -248,5 +248,5 @@ md_high_schools_with_acs |>
     )
 ```
 
-**Task** What is another question you could ask of this data? **Answer** Which counties have the highest rate of college enrollment, and what is their median incom (and the opposite)?
+**Task** What is another question you could ask of this data? **Answer** Which counties have the highest rate of college enrollment, and what is their median income (and the opposite)?
 
