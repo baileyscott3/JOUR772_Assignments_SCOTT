@@ -54,7 +54,9 @@ First, we'll add a month column to our dataframe using lubridate.
 
 ### Task 3: Add a month column to our 911 calls dataframe using lubridate and calculate the number of calls for each month
 
-**Task** Run the following code to add a month column to our dataframe using lubridate and count the number of calls for each month. In the space below, explain what each step of the code below is doing in English. Note the "label=TRUE" part in the mutate statement. **Answer**
+**Task** Run the following code to add a month column to our dataframe using lubridate and count the number of calls for each month. In the space below, explain what each step of the code below is doing in English. Note the "label=TRUE" part in the mutate statement. 
+
+**Answer** Adds a column extracting the month from the date column, then groups by month, counts the number of calls per month, and arranges them in descending order
 
 ```{r}
 baltco_911_calls_by_month <- baltco_911_calls |>
@@ -72,7 +74,7 @@ With ggplot, the first thing we'll always do is draw a blank canvas that will co
 
 ### Task 4: Create an empty ggplot container
 
-**Task** Run the following code. Explain what you see after running the code in the space below. **Answer**
+**Task** Run the following code. Explain what you see after running the code in the space below. **Answer** Empty rectangle
 
 ```{r}
 baltco_911_calls_by_month |>
@@ -103,36 +105,51 @@ After we've invoked the ggplot() function, you'll notice we're using a + symbol.
 
 ### Task 5: Run the following code
 
-**Task** Run the following code. Explain what you see after running the code in the space below. **Answer**
+**Task** Run the following code. Explain what you see after running the code in the space below. **Answer** bars on a grid, with an x- and y-axis with labels
 
 ```{r}
 baltco_911_calls_by_month |>
   ggplot() +
-  geom_bar(aes(x=month, weight=total_calls))
+  geom_bar(
+    aes(
+      x=month, 
+      weight=total_calls
+      )
+    )
 ```
 
 This is a very basic chart. But it's hard to derive much meaning from this chart, because the months aren't ordered from highest to lowest by total_calls We can fix that by using the reorder() function to do just that:
 
 ### Task 6: Run the following code
 
-**Task** Run the following code. Explain what you see after running the code in the space below. What has changed from the last codeblock? **Answer**
+**Task** Run the following code. Explain what you see after running the code in the space below. What has changed from the last codeblock? **Answer** The bars are now in order from least to greatest
 
 ```{r}
 baltco_911_calls_by_month |>
   ggplot() +
-  geom_bar(aes(x=reorder(month,total_calls), weight=total_calls))
+  geom_bar(
+    aes(
+      x=reorder(month,total_calls), 
+      weight=total_calls
+      )
+    )
 ```
 
 This is a little more useful. But the bottom is kind of a mess, with overlapping names. We can fix that by flipping it from a vertical bar chart (also called a column chart) to a horizontal one. coord_flip() does that for you.
 
 ### Task 7: Run the following code
 
-**Task** Run the following code. Explain what you see after running the code in the space below. What has changed from the last codeblock? **Answer**
+**Task** Run the following code. Explain what you see after running the code in the space below. What has changed from the last codeblock? **Answer** The bars flipped from the x-axis to the y-axis
 
 ```{r}
 baltco_911_calls_by_month |>
   ggplot() +
-  geom_bar(aes(x=reorder(month,total_calls), weight=total_calls)) +
+  geom_bar(
+    aes(
+      x=reorder(month,total_calls), 
+      weight=total_calls
+      )
+    ) +
   coord_flip()
 ```
 
@@ -146,12 +163,17 @@ It's kind of like applying CSS to html. Here I'm changing the theme slightly to 
 
 ### Task 8: Run the following code
 
-**Task** Run the following code. Explain what you see after running the code in the space below. What has changed from the last codeblock? **Answer**
+**Task** Run the following code. Explain what you see after running the code in the space below. What has changed from the last codeblock? **Answer** The weird gray background has disappeared
 
 ```{r}
 baltco_911_calls_by_month |>
   ggplot() +
-  geom_bar(aes(x=reorder(month,total_calls), weight=total_calls)) +
+  geom_bar(
+    aes(
+      x=reorder(month,total_calls), 
+      weight=total_calls
+      )
+    ) +
   coord_flip() + 
   theme_minimal()
 ```
@@ -173,12 +195,17 @@ And now we'll apply the economist theme from that package with theme_economist()
 
 ### Task 10: Run the following code
 
-**Task** Run the following code. Explain what you see after running the code in the space below. What has changed from the last version of the chart? **Answer**
+**Task** Run the following code. Explain what you see after running the code in the space below. What has changed from the last version of the chart? **Answer** Grid disppeared, the area around the chart is now grey, and there's some more extra styling
 
 ```{r}
 baltco_911_calls_by_month |>
   ggplot() +
-  geom_bar(aes(x=reorder(month,total_calls), weight=total_calls)) +
+  geom_bar(
+    aes(
+      x=reorder(month,total_calls), 
+      weight=total_calls
+      )
+    ) +
   coord_flip() + 
   theme_economist()
 ```
@@ -192,7 +219,12 @@ Those axis titles are kind of a mess. Let's change "count" on the x axis to "tot
 ```{r}
 baltco_911_calls_by_month |>
   ggplot() +
-  geom_bar(aes(x=reorder(month,total_calls), weight=total_calls)) +
+  geom_bar(
+    aes(
+      x=reorder(month,total_calls), 
+      weight=total_calls
+      )
+    ) +
   coord_flip() + 
   theme_economist() +
   labs(
