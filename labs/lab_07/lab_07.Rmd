@@ -26,6 +26,7 @@ options(scipen=999)
 # Load the tidyverse.
 library(tidyverse)
 library(tidycensus)
+library(janitor)
 ```
 
 ## Setup Census API
@@ -56,21 +57,21 @@ View(acs5)
 
 ```{r}
 
-md <- get_acs(geography = "county",
+md_age <- get_acs(geography = "county",
               variables = c(median_age = "B01002_001"),
               state = "MD",
               year = 2023)
-md |> 
+md_age |> 
   arrange(estimate)
 ```
 
-**Q2** Which Maryland counties have a median age of at least 50? You can use the dataframe you just made to answer this, but you must write code to display only those counties with a median age of at least 50. **A2**
+**Q2** Which Maryland counties have a median age of at least 50? You can use the dataframe you just made to answer this, but you must write code to display only those counties with a median age of at least 50. 
+
+**A2** Talbot County and Worcester County
 
 ```{r}
-
-
-
-
+md_age |> 
+  filter(estimate >= 50)
 ```
 
 **Q3** We're interested in knowing more about Montgomery County zip codes where overdose calls are coming from and the demographic characteristics they possess. In particular, we want to calculate a rate of calls per 1,000 population. To do this, you'll need to:
@@ -84,18 +85,66 @@ md |>
 
 Which zip code has the highest rate of calls? Which has the lowest?
 
-**A3**
+**A3** 20877 has the highest rate of calls, while 20707 has the lowest
 
 ```{r}
+
+overdose_data <- read_csv("data/montgomery_2022_overdoses.csv") |> 
+  clean_names()
+
+zip_totals <- overdose_data |>
+  mutate(zip = as.character(zip)) |> 
+  group_by(zip) |> 
+  summarise(
+    total = n()
+  )
+
+md_over_18 <- get_acs(geography = "zcta",
+              variables = c(over_18 = "B15001_001"),
+              state = "MD",
+              year = 2019) |> 
+  rename(pop_18_over = "estimate")
+
+calls_md_over_18 <- zip_totals |> 
+  inner_join(md_over_18, by=c('zip'='GEOID')) |> 
+  mutate(per_capita = (total/pop_18_over) * 1000) |> 
+  arrange(desc(per_capita))
+
+
+
+
 ```
 
 **Q4** Using [CensusReporter.org](https://censusreporter.org/), examine the zip codes with the highest and lowest rates and compare and contrast their demographic profiles. Is there a story here?
 
-**A4**
+**A4** I think there might be, simply based on the poverty rates, household income and education. 20877 has a significantly lower medium income and a higher poverty rate. There are also significant differences in education, with 20707 having a much higher high school graduation rate and percentage of the population with bachelor's degrees.
 
 **Q5** Go back to your joined dataframe from Q3 and add two more columns representing the minimum and maximum populations based on the estimate and margin of error, then calculate per capita rates for each. Do you get the same two zip codes for the highest and lowest as you did before? Does that give you more or less confidence in your answers to Q3?
 
-**A5**
+**A5** The zipcodes for highest and lowest have stayed the same. This gives me a lot more confidence in my answers to question 3
 
 ```{r}
+calls_md_over_18 <- calls_md_over_18 |> 
+  mutate(
+    max_pop = pop_18_over + moe,
+    min_pop = pop_18_over - moe
+  )
+
+calls_md_over_18 |> 
+  group_by(zip) |> 
+  summarise(
+    max_per_capita = (total/max_pop) * 1000
+  ) |> 
+  arrange(desc(max_per_capita))
+
+calls_md_over_18 |> 
+  group_by(zip) |> 
+  summarise(
+    min_per_capita = (total/min_pop) * 1000
+  ) |> 
+  arrange(desc(min_per_capita))
+
+
+
+
 ```
