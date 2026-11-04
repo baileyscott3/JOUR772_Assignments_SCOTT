@@ -214,7 +214,7 @@ Those axis titles are kind of a mess. Let's change "count" on the x axis to "tot
 
 ### Task 11: Run the following code
 
-**Task** Run the following code. Explain what you see after running the code in the space below. What has changed from the last codeblock? **Answer**
+**Task** Run the following code. Explain what you see after running the code in the space below. What has changed from the last codeblock? **Answer** Both the x- and y-axis have labels, and there's now a source at the bottom.
 
 ```{r}
 baltco_911_calls_by_month |>
@@ -248,7 +248,7 @@ So, let's use the same Baltimore County data and generate a count of contributio
 
 ### Task 12: Create a dataframe of 911 calls by date
 
-**Task** Run the following code. Explain what you see after running the code in the space below. **Answer**
+**Task** Run the following code. Explain what you see after running the code in the space below. **Answer** It grouped and summarised the data by date
 
 ```{r}
 baltco_911_calls_by_date <- baltco_911_calls |>
@@ -266,7 +266,7 @@ We'll put the date on the x axis and total contributions on the y axis.
 
 ### Task 13: Run the following code
 
-**Task** Run the following code. Explain what you see after running the code in the space below. **Answer**
+**Task** Run the following code. Explain what you see after running the code in the space below. **Answer** A very messy line chart
 
 ```{r}
 baltco_911_calls_by_date |>
@@ -284,7 +284,7 @@ We'll set the date_breaks to appear for every week; if we wanted every month, we
 
 ### Task 14: Run the following code
 
-**Task** Run the following code. Explain what you see after running the code in the space below. **Answer**
+**Task** Run the following code. Explain what you see after running the code in the space below. **Answer** It has gotten slightly less messy, but the x-axis labels are unreadable
 
 ```{r}
 baltco_911_calls_by_date |>
@@ -297,7 +297,7 @@ Those are a little hard to read, so we can turn them 45 degrees to remove the ov
 
 ### Task 15: Run the following code
 
-**Task** Run the following code. Explain what you see after running the code in the space below. **Answer**
+**Task** Run the following code. Explain what you see after running the code in the space below. **Answer** A little more readable, still kinda messy
 
 ```{r}
 baltco_911_calls_by_date |>
