@@ -16,6 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 
 library(tidyverse)
+library(tidycensus)
 library(lubridate)
 library(refinr)
 library(ggthemes)
@@ -38,9 +39,11 @@ pg_overdose_calls <- read_csv("data/prince_georges_2022_overdoses.csv")
 pg_overdose_calls <- pg_overdose_calls |> 
   mutate(
     date = date(datetime),
-    month = month(datetime),
-    week = week(datetime)
+    month = floor_date(datetime, "month"),
+    week = floor_date(datetime, "week")
   )
+
+acs5 <- load_variables(2022, "acs5")
 ```
 
 
@@ -54,9 +57,34 @@ pg_overdose_calls <- pg_overdose_calls |>
 
 Compare the results here to those from the pre_lab_08 bar chart - are there major differences in the months with the highest and lowest figures? Describe that below.
 
-**A1.**
+**A1.** Yes, December has the highest percentage, while in the pre-lab it had a rather low number. Also in the pre-lab, we saw that summer months usually had the highest number of calls, but in this chart, winter months have the higher average percentages.
 
 ```{r}
+month_percent <- pg_overdose_calls |> 
+  group_by(month) |> 
+  summarize(
+    count = n()
+  ) |> 
+  mutate(pct_total = round(count / sum(count) * 100, 1)) |>
+  arrange(desc(count))
+
+month_percent |> 
+  ggplot() +
+  geom_bar(
+    aes(
+      x=month, 
+      weight=pct_total
+      )
+    ) + 
+  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+  theme_minimal() +
+  labs(
+    title="Highest Percentage of PG County 911 Calls, per month",
+    x = "month",
+    y = "percent of total calls",
+    caption = "source: Prince George's County EMS"
+    
+  )
 ```
 
 **Q2.** Let's visualize this data on a weekly basis using a line chart. As in Q1, generate a dataframe with the total number of calls for each week, and then create a line chart to show the distribution of calls over time. Your line chart must have:
@@ -67,9 +95,32 @@ Compare the results here to those from the pre_lab_08 bar chart - are there majo
 
 Describe the pattern of results; you may want to look at the data to dig into particular outliers.
 
-**A2.**
+**A2.** The data fluctuates, with a large spike in July, and gradual increase as the year goes on, with multiple weeks in December having high totals. The other obvious outlier is at the beginning, which includes the last couple of days in December 2021, which of course have no data.
 
 ```{r}
+week_total <- pg_overdose_calls |> 
+  group_by(week) |> 
+  summarise(
+    total_calls = n()
+  ) |> 
+  arrange(desc(total_calls))
+
+week_total |> 
+  ggplot() +
+  geom_line(
+    aes(
+      x=week, 
+      y=total_calls
+      )
+    ) + 
+  scale_x_date(date_breaks = "5 week", date_labels = "%b %d") +
+  theme_minimal() +
+  labs(
+    title="Highest Number of PG County 911 Calls, per week",
+    x = "week",
+    y = "number of calls",
+    caption = "source: Prince George's County EMS"
+  ) 
 ```
 
 **Q3.** A scatterplot is a type of chart that helps us see relationships between two variables. One variable goes on the x axis, the other on the y axis. For each row/observation in our data, a scatterplot puts a circle (or a "point") where the two variables intersect on a grid.
@@ -97,4 +148,41 @@ To answer this question, do the following:
 **A3.**
 
 ```{r}
+zipcode_total <- pg_overdose_calls |> 
+  filter(nchar(zipcode) == 5) |> 
+  group_by(zipcode) |> 
+  summarise(
+    total_calls = n() 
+  ) |> 
+  arrange(desc(total_calls))
+
+md_income <- get_acs(geography = "zcta",
+              variables = c(median_income = "B07011_001"),
+              state = "MD",
+              year = 2019)
+
+
+pg_911_median_income <- zipcode_total |> 
+  left_join(md_income, by=c('zipcode'='GEOID'))
+
+
+pg_911_median_income |> 
+  ggplot() +
+  geom_point(
+    aes(
+      x=total_calls, 
+      y=estimate
+      )
+  ) +
+  theme_minimal() +
+  labs(
+    title="Median income vs. Number of PG 911 calls, by zipcode",
+    x = "number of calls",
+    y = "median income ($)",
+    caption = "source: Prince George's County EMS, U.S. Census Bureau"
+  ) 
+
+
+
+
 ```
