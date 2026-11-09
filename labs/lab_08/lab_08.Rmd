@@ -145,7 +145,7 @@ To answer this question, do the following:
 6.  Add a label for each point that shows the zip code using geom_text() - see some examples of its use at <https://ggplot2.tidyverse.org/reference/geom_text.html#ref-examples>. Try to make the names as easy to read as possible by avoiding overlap.
 7.  In the answer space below, describe what you see and answer the questions posed above. In a general sense, what do you think this means? Feel free to consider the actual raw values: how would you report out the main point(s) of this chart?
 
-**A3.**
+**A3.** In the chart, the higher the median household income in a zipcode, the generally lower the number of 911 overdose calls in that zipcode. This shows that there is probably a relationship between median household income and thet rate of 911 calls.
 
 ```{r}
 zipcode_total <- pg_overdose_calls |> 
@@ -153,11 +153,10 @@ zipcode_total <- pg_overdose_calls |>
   group_by(zipcode) |> 
   summarise(
     total_calls = n() 
-  ) |> 
-  arrange(desc(total_calls))
+  )
 
 md_income <- get_acs(geography = "zcta",
-              variables = c(median_income = "B07011_001"),
+              variables = c(median_income = "B19013_001"),
               state = "MD",
               year = 2019)
 
@@ -167,18 +166,19 @@ pg_911_median_income <- zipcode_total |>
 
 
 pg_911_median_income |> 
-  ggplot() +
-  geom_point(
+  ggplot(
     aes(
-      x=total_calls, 
-      y=estimate
-      )
+      x=estimate, 
+      y=total_calls
+    ) 
   ) +
+  geom_point() +
+  geom_text(aes(label = zipcode), check_overlap = TRUE, vjust = -1, size = 3) +
   theme_minimal() +
   labs(
     title="Median income vs. Number of PG 911 calls, by zipcode",
-    x = "number of calls",
-    y = "median income ($)",
+    x = "median household income ($)",
+    y = "number of calls",
     caption = "source: Prince George's County EMS, U.S. Census Bureau"
   ) 
 
