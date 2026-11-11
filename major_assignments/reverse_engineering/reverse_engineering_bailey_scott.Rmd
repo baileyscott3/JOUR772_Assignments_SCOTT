@@ -49,6 +49,12 @@ In this section, describe the source of the data, write a basic data dictionary 
 
 nc_finance_data <- read_excel("data/donors0103-0701.xlsx")
 
+
+#Gov. Cooper campaign finance data
+cooper_finance_data <- read_csv("data/cooper_finance_data.csv") |> 
+  clean_names() |> 
+  mutate(date = mdy(date))
+
 # Path to data should be loaded from folder "data" i.e. read_csv("data/name_of_data.csv")
 
 # Clean required data and prepare for analysis if needed. 
@@ -86,10 +92,8 @@ session_nc_finance_data |>
 
 ### Sentence 2
 
-# HELP!!!!!!!
-
 - **Sentence text**: Add in donations to the two main political parties and to a handful of other large fundraising vehicles for state legislative races, and the in-session giving topped \$3.4 million. Gov. Roy Cooper's main campaign account brought in another \$407,000 during session.
-- **Analysis summary**: [Write up two to three sentences describing the results of your analysis. Were you able to confirm the finding? If not, why not?]
+- **Analysis summary**: We simply took the total amount of donations for the in-session finance data that we had created earlier, and found the \$3.4 million. The second statement was much harder to prove, and required us to find another dataset, specifically for Gov. Roy Cooper's campaign. However, once we found that data and loaded it in, we confirmed that he had received $407,000 during the session.
 
 ```{r}
 # Put code to reverse engineer sentence here
@@ -100,10 +104,12 @@ session_nc_finance_data |>
   )
 
 #Roy Cooper's campaign
-session_nc_finance_data |> 
-  filter (sboe_id == "STA-C3839N-C-001") |> 
-  summarise(
-    cooper_donations = sum(amount)
+session_cooper_finance_data <- cooper_finance_data |> 
+  filter(between(date, as.Date("2018-05-16"), as.Date("2018-06-29")))
+
+session_cooper_finance_data |> 
+  summarise (
+    total_amount = sum(amount)
   )
 
 
@@ -180,14 +186,36 @@ session_nc_finance_data |>
 
 ### Sentence 5
 
-- **Sentence text**: [Paste in sentence to engineer here]
-- **Analysis summary**: [Write up two to three sentences describing the results of your analysis. Were you able to confirm the finding? If not, why not?]
+- **Sentence text**: A WRAL News analysis of campaign finance filings also turned up $16,000 in donations to legislative campaigns during session from 15 PACs with a lobbyist. Each would appear to be a violation of state fundraising rules, but spokespeople for most of the PACs, or the companies they represent, said there was a simple explanation: The checks were written before session.
+- **Analysis summary**: We filtered by "PAC" to find all the PACs who had donated in session, then once we filtered out the non-campaign contributions (and one stray person who's last name was Pace), we were able to determine that 15 PACs had donated. However, we were unable to confirm the second finding. When we summarised to find the total amount donated, we came up with an amount roughly \$3,500 more than what was in the story, and we were unable to figure out why this gap existed, no matter what we tried.
 
 ```{r}
 # Put code to reverse engineer sentence here
+pac_session_data <- session_nc_finance_data |>
+  filter(str_detect(name_clean, " PAC"))
+
+#how many are there?
+pac_campaign_session_data <- pac_session_data |> 
+  filter(committee_name != "NC REC - STATE" & 
+         committee_name != "NC DEC - STATE" &
+         name_clean != "BRIAN S PACE"
+         )
+
+pac_campaign_session_data |> 
+  group_by(name_clean) |> 
+  summarise(
+    count = n()
+  ) |> 
+  arrange(desc(count))
+
+#how much did they give in total?
+pac_campaign_session_data |> 
+  summarise(
+    total_amount = sum(amount)
+  )
 
 # Display results of code below this codeblock
 
 ```
 
--30-
+
