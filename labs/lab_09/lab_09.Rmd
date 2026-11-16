@@ -20,17 +20,43 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 # load libraries here
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(dplyr)
 ```
 
 ## Questions
 
 **Q1.** You want to explore the differences between the electoral performances of Dan Cox in 2022 and Larry Hogan in 2018. Except a map is probably not the best way to show that. Let's make a chart instead, and the type is up to you, but the goal is to clearly show the differences between the two.
 
-You MUST do the following things when answering this question: \* Load the md_gov_county.csv and md_gov_county_18.csv files from the data folder \* Join those dataframes, specifying the join column. \* Add columns to generate percentages for Cox and Hogan. \* Export that joined dataframe to a CSV file using `write_csv`. \* Using that exported CSV, make a chart with Datawrapper. What kind of chart is up to you, so experiment with a few kinds of charts to see what answers the question above in the clearest way. Your chart MUST: \* Have a title, description and source that tells readers about the data. The title and description should highlight the most newsworthy or important aspect. \* Easily readable labels and values \* Publish your chart \* Describe your thought process below - why you chose to make the chart you did - and add the URL of your chart.
+You MUST do the following things when answering this question: 
+\* Load the md_gov_county.csv and md_gov_county_18.csv files from the data folder 
+\* Join those dataframes, specifying the join column. 
+\* Add columns to generate percentages for Cox and Hogan. 
+\* Export that joined dataframe to a CSV file using `write_csv`. 
+\* Using that exported CSV, make a chart with Datawrapper. What kind of chart is up to you, so experiment with a few kinds of charts to see what answers the question above in the clearest way. 
+Your chart MUST: 
+\* Have a title, description and source that tells readers about the data. The title and description should highlight the most newsworthy or important aspect. 
+\* Easily readable labels and values 
+\* Publish your chart 
+\* Describe your thought process below - why you chose to make the chart you did - and add the URL of your chart.
 
-**A1.**
+**A1.** I used a bullet bars chart because I noticed that Hogan outperformed Cox in every county, and grouped bars made the chart way too big and made it hard to understand. https://datawrapper.dwcdn.net/KIQlo/1/
 
 ```{r}
+md_gov_county <- read.csv("data/md_gov_county.csv")
+md_gov_county_18 <- read.csv("data/md_gov_county_18.csv")
+
+
+combined_md_gov <- md_gov_county |> 
+  left_join(md_gov_county_18, by="GEOID") |> 
+  mutate(
+    cox_pct = (Cox / (Cox + Moore + Lashar + Wallace + Harding + Sefcik + Write.ins.x)) *100,
+    hogan_pct = (Hogan / (Hogan + Jealous + Quinn + Schlakman + Write.ins.y)) *100
+  )
+
+write_csv(combined_md_gov, "data/combined_md_gov.csv", append = FALSE)
 ```
 
 **Q2.** You're interested in seeing how the methods of voting have changed in Maryland since 2018. Using the `md_votes_by_type.csv` that has data from the top of the ticket (governor in 2018 and 2022, president in 2020), make a chart showing the percentage of votes cast in each category - early voting, election day and mail - over the three years. You'll need to make those percentages in R and then export the CSV using `write_csv`, then make the chart in Datawrapper. Have a title, description and source that tells readers about the data. The title and description should highlight the most newsworthy or important aspect.
@@ -39,9 +65,20 @@ HINT: In Datawrapper's "Check and Describe" tab, you can click on a column to ge
 
 What do you think the story here is? Put the answer below along with the URL of your chart.
 
-**A2.**
+**A2.** I think the main story is how high the percentage of mail-in votes has remained since the pandemic. https://datawrapper.dwcdn.net/jVwWh/1/
 
 ```{r}
+md_votes_by_type <- read_csv("data/md_votes_by_type.csv") |> 
+  clean_names()
+
+md_votes_by_type <- md_votes_by_type |> 
+  mutate(
+    early_pct = (early / total) * 100,
+    day_pct = (election_day / total) * 100,
+    mail_pct = (mail / total) * 100
+  )
+
+write_csv(md_votes_by_type, "data/md_votes_by_type.csv")
 ```
 
 **Q3.** You want to know more about the geography of 911 overdose calls in Montgomery County, Maryland, in 2022. To do that, you'll make a choropleth map in Datawrapper. You will need to:
@@ -56,7 +93,24 @@ What do you think the story here is? Put the answer below along with the URL of 
 
 What do you think the story here is, and what would you want to know more about? Put the answer below along with the URL of your map.
 
-**A3.**
+**A3.** I think the story is about which zipcodes have the highest percentage of 911 calls, and I would be curious to know some of the demographic information about these zipcodes (and maybe some of the cities in those zipcodes as well)
+https://datawrapper.dwcdn.net/eQ7dM/1/
 
 ```{r}
+montgomery_2022_overdoses <- read_csv("data/montgomery_2022_overdoses.csv") |> 
+  mutate(zip = as.character(zip))
+
+
+overdoses_by_zipcode <- montgomery_2022_overdoses |> 
+  group_by(zip) |> 
+  summarise(
+    total_calls = n()
+  ) |> 
+  mutate(
+    pct_calls = (total_calls / sum(total_calls)) *100
+  )
+
+write_csv(overdoses_by_zipcode, "data/overdoses_by_zipcode.csv")
+
+
 ```
