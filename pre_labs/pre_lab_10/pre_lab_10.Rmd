@@ -188,17 +188,18 @@ Now we can join the zip codes to the foreclosure data.
 
 ### Task: Run code to join the zip code shapes with the foreclosure notice data
 
-**Task** Run the following code. Describe the output in the space below. **Answer**
+**Task** Run the following code. Describe the output in the space below. **Answer** Joined the data with the zipcode data
 
 ```{r}
-zip_codes_with_foreclosures <- md_zips |> left_join(foreclosure_zip_march_2023, join_by(ZIPCODE1==zip))
+zip_codes_with_foreclosures <- md_zips |> 
+  left_join(foreclosure_zip_march_2023, join_by(ZIPCODE1==zip))
 ```
 
 Now we can use color to distinguish zip codes from each other. Let's use the number of foreclosure notices to start with:
 
 ### Task: Run code
 
-**Task** Run the following code. Describe the output in the space below. **Answer**
+**Task** Run the following code. Describe the output in the space below. **Answer**Created a map of MD zipcodes color-coded to the number of foreclosures in each one, with light blue being the most
 
 ```{r}
 county_centroids <- st_centroid(zip_codes_with_foreclosures)
@@ -226,7 +227,6 @@ library(tidyverse)
 library(sf)
 library(janitor)
 library(tidycensus)
-#census_api_key("549950d36c22ff16455fe196bbbd01d63cfbe6cf")
 ```
 
 For the rest of this chapter, we're going to work on building a map that will help us gain insight into geographic patterns in foreclosure notices by county in Maryland. What geographic patterns can we identify?
@@ -235,7 +235,7 @@ First, we'll go out and get the county foreclosure notices and population data f
 
 ### Task: Run code
 
-**Task** Run the following code. Describe the output in the space below. **Answer**
+**Task** Run the following code. Describe the output in the space below. **Answer** Made some dataframes from data we already had and from the Census
 
 ```{r}
 md_county_notices <- read_csv("data/Maryland_Foreclosure_Data_by_County.csv") |> slice(1) |> pivot_longer(cols=-c('Date', 'Type'), names_to='county', values_to = 'notices')
@@ -250,7 +250,7 @@ Ultimately, we're going to join this county table with population with foreclosu
 
 ### Task: Run code
 
-**Task** Run the following code. Describe the output in the space below. **Answer**
+**Task** Run the following code. Describe the output in the space below. **Answer** Made the same dataframe as before, but included a multi polygon column
 
 ```{r}
 md_county_population <- get_acs(geography = "county",
@@ -270,7 +270,7 @@ But there's a problem. The column in our population data that has county names i
 
 ### Task: Run code
 
-**Task** Run the following code. Describe the output in the space below. **Answer**
+**Task** Run the following code. Describe the output in the space below. **Answer** Compares the 2 dataframes
 
 ```{r}
 md_county_population
@@ -284,7 +284,7 @@ Let's clean the population table. We're going to rename the "NAME" column to "co
 
 ### Task: Run code
 
-**Task** Run the following code. Describe the output in the space below. **Answer**
+**Task** Run the following code. Describe the output in the space below. **Answer** Cleaned the NAME column so that it matches the county column in the other dataframe
 
 ```{r}
 md_county_population <- md_county_population |>
@@ -301,7 +301,7 @@ Now we can join them!
 
 ### Task: Run code
 
-**Task** Run the following code. Describe the output in the space below. **Answer**
+**Task** Run the following code. Describe the output in the space below. **Answer** Joined the 2 dataframes using the county column
 
 ```{r}
 md_pop_with_foreclosures <- md_county_population |>
@@ -314,7 +314,7 @@ Our final step before visualization, let's calculate the number of foreclosure n
 
 ### Task: Run code
 
-**Task** Run the following code. Describe the output in the space below. **Answer**
+**Task** Run the following code. Describe the output in the space below. **Answer** Calculated the number of foreclosure notices per 1000 population and sorted from highest to lowest
 
 ```{r}
 md_pop_with_foreclosures <- md_county_population |>
@@ -331,7 +331,7 @@ Okay, now let's visualize. We're going to build a choropleth map, with the color
 
 ### Task: Run code
 
-**Task** Run the following code. Describe the output in the space below. **Answer**
+**Task** Run the following code. Describe the output in the space below. **Answer** Made a map of zipcodes in MD, with different shades of blue indicating the rate of foreclosures per 1000 pop. in each zipcode
 
 ```{r}
 
@@ -349,7 +349,7 @@ This map is okay, but the color scale makes it hard to draw fine-grained differe
 
 ### Task: Run code
 
-**Task** Run the following code. Describe the output in the space below. **Answer**
+**Task** Run the following code. Describe the output in the space below. **Answer** Same as before, but easier to see
 
 ```{r}
 ggplot() +
@@ -364,7 +364,7 @@ So let's change the color scale to a "log" scale, which will help us see those d
 
 ### Task: Run code
 
-**Task** Run the following code. Describe the output in the space below. What regional patterns do you see? **Answer**
+**Task** Run the following code. Describe the output in the space below. What regional patterns do you see? **Answer** Same as before but EVEN MORE clear
 
 ```{r}
 ggplot() +
