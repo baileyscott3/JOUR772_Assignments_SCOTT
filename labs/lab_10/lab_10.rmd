@@ -29,8 +29,10 @@ library(dplyr)
 
 ```{r}
 # Loading data
-county_outages <- read.csv("data/county_outages_march2023.csv")
-ev_20_23 <- read.csv("data/ev_2020_2023.csv")
+county_outages <- read.csv("data/county_outages_march2023.csv") |> 
+  mutate(county = str_to_upper(county))
+ev_20_23 <- read.csv("data/ev_2020_2023.csv") |> 
+  mutate(county = str_to_upper(county))
 md_statewide_county <- read.csv("data/md_statewide_county.csv") |> 
   mutate(GEOID = as.character(GEOID))
 
@@ -59,7 +61,8 @@ moore_v_brown <- md_statewide_county |>
 
 counties <- counties()
 md_counties <- counties |>
-  filter(STATEFP == "24")
+  filter(STATEFP == "24") |> 
+  mutate(NAMELSAD = str_to_upper(NAMELSAD))
 
 b_v_m_counties <- md_counties |> 
   left_join(moore_v_brown, join_by(GEOID))
@@ -74,9 +77,26 @@ ggplot() +
 
 **Q2.** Make a county-level map to explore the number of customers impacted by power outages in Maryland from last March. Load the `county_outages_march2023.csv` file in the data folder and calculate a rate of customers with outages per 10,000 total customers for each county. Then join that dataframe to your Maryland counties dataframe you made in Q1 and create a county-level map of the results; you may need to tweak the fill scale to make the distinctions clearer. What's the potential story here? Given access to other months' outage data, what would your next steps be in reporting a story?
 
-**A2.**
+**A2.** A potential story is why does Talbot County have so many power outages per capita compared to other counties in March? Did something happen? If I had access to more months, I would check to see if Talbot County's March number was an outlier, and see if there are other counties with higher (or much lower) average outages per capita.
 
 ```{r}
+county_outages <- county_outages |> 
+  mutate(
+    per_capita = (outage_customers / total_customers) * 10000,
+    county = case_when(
+      county == "BALTIMORE CITY" ~ "BALTIMORE CITY",
+      .default = paste0(county, " COUNTY")
+    )
+  )
+
+outage_map <- md_counties |> 
+  left_join(county_outages, by=c('NAMELSAD'='county'))
+
+
+ggplot() +
+  geom_sf(data=outage_map, aes(fill=per_capita)) +
+  theme_minimal() +
+  scale_fill_viridis_b(option="magma",trans = "log")
 ```
 
 **Q3.** You've been assigned a story about the use of electric vehicles in Maryland and you want to make a map of the prevalence of electric vehicles in each county. Load the `ev_2020_2023.csv` file, which has the number of electric and hybrid vehicles per county from July 2020 and March 2023 and calculate a percentage change for each county (remember, that's `new-old/old`). Using the Maryland counties dataframe you made for Q1, make a county map showing the percentage change. What counties stand out to you? What questions do you have about the changes you're seeing?
@@ -87,7 +107,50 @@ Then, calculate a per capita rate of electric & hybrid vehicles using the March 
 
 Finally, make a second county map showing the per capita rate. What counties stand out on this map? How is it different from the first one you made?
 
-**A3.**
+**A3.** Caroline County has a pct change of over 400%, while most other counties are hovering around 200%. The map definitely shows that electric vehicles have increased, but I wonder if Caroline County is just an outlier. 
+
+In the second map, the counties that stand out are Montgomery County and Howard County. Caroline County is no longer significant, proving that the pct increase result was an outlier.
 
 ```{r}
+ev_20_23 <- ev_20_23 |> 
+  mutate(
+    pct_change = ((march_2023 - july_2020)/july_2020) *100,
+    county = case_when(
+      county == "BALTIMORE CITY" ~ "BALTIMORE CITY",
+      .default = paste0(county, " COUNTY")
+    )
+  )
+
+ev_counties <- md_counties |> 
+  left_join(ev_20_23, by=c('NAMELSAD'='county'))
+
+ggplot() +
+  geom_sf(data=ev_counties, aes(fill=pct_change)) +
+  theme_minimal() +
+  scale_fill_viridis_b(option="magma", trans = "log")
+
+
 ```
+
+
+```{r}
+md_county_population <- get_acs(geography = "county",
+              variables = c(population = "B01001_001"),
+              year = 2021,
+              state = "MD")
+
+pop_ev_counties <- ev_counties |> 
+  left_join(md_county_population, join_by(GEOID))
+
+pop_ev_counties <- pop_ev_counties |> 
+  mutate(
+    per_capita = (march_2023 / estimate) * 10000,
+  )
+
+ggplot() +
+  geom_sf(data=pop_ev_counties, aes(fill=per_capita)) +
+  theme_minimal() +
+  scale_fill_viridis_b(option="magma")
+
+```
+
